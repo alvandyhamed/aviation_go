@@ -1,8 +1,13 @@
+// @title           SepTaf API
+// @version         0.1
+// @description     Airports/Countries/Regions listing
+// @BasePath        /
 package main
 
 import (
 	"SepTaf/internal/config"
-	httpx "SepTaf/internal/http"
+	_ "SepTaf/internal/docs"
+	httpx "SepTaf/internal/httpx"
 	"SepTaf/internal/ingest"
 	mdb "SepTaf/internal/mongo"
 	"context"
@@ -38,9 +43,11 @@ func main() {
 	c.Start()
 	defer c.Stop()
 
+	httpx.SetDeps(mc, cfg)
+
 	srv := &http.Server{
 		Addr:         ":" + cfg.Port,
-		Handler:      httpx.NewRouter(mc),
+		Handler:      httpx.NewRouter(mc, cfg),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}

@@ -1,6 +1,8 @@
 package config
 
-import "os"
+import (
+	"os"
+)
 
 type Config struct {
 	Port           string
@@ -28,5 +30,6 @@ func Load() Config {
 		URLCountries:   getenv("DATA_URL_COUNTRIES", "https://ourairports.com/data/countries.csv"),
 		URLRegions:     getenv("DATA_URL_REGIONS", "https://ourairports.com/data/regions.csv"),
 		IngestSchedule: getenv("INGEST_SCHEDULE", "@every 240h"), // 10 روز
+
 	}
 }
