@@ -18,6 +18,7 @@ type CountryDTO struct {
 	Code      string `json:"code"`
 	Name      string `json:"name,omitempty"`
 	Continent string `json:"continent,omitempty"`
+	Keywords  string `json:"keywords,omitempty"`
 }
 type CountriesResponse struct {
 	Items []CountryDTO `json:"items"`
