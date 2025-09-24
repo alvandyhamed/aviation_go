@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	_ "SepTaf/internal/docs"
 	mdb "SepTaf/internal/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -113,8 +114,8 @@ func airportsListHandler(mc *mdb.Client) http.HandlerFunc {
 // @Param        page     query   int     false  "page (>=1)"      default(1)
 // @Param        limit    query   int     false  "items per page"  default(20)  minimum(1)  maximum(200)
 // @Success      200      {object}  AirportsResponse
-// @Router       /airports [get]
-func AirportsList(w http.ResponseWriter, r *http.Request) {
+// @Router       /airportsList [get]
+func airportsList(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
@@ -175,4 +176,63 @@ func AirportsList(w http.ResponseWriter, r *http.Request) {
 		Items: items,
 		Meta:  PageMeta{Page: page, Limit: int(limit), Total: total},
 	})
+}
+
+// test godoc
+// @Summary      Test Airport Search
+// @Description  A simple test endpoint to search and paginate airports by name or municipality.
+// @Tags         airports
+// @Produce      json
+// @Param        q        query   string  false  "Search term for airport name or municipality"
+// @Param        page     query   int     false  "Page number for pagination" default(1)
+// @Param        limit    query   int     false  "Number of items per page"   default(20)
+// @Success      200      {object}  AirportsResponse
+// @Failure      500      {object}  map[string]string "Internal Server Error"
+// @Router       /test [get]
+func Test(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+
+	filter := bson.M{}
+	var sort bson.D
+
+	if q != "" {
+
+		filter["$or"] = []bson.M{
+			{"name": bson.M{"$regex": q, "$options": "i"}},
+			{"municipality": bson.M{"$regex": q, "$options": "i"}},
+		}
+	}
+
+	page := getPage(r)
+	limit := getLimit(r, 20, 200)
+	skip := int64(page-1) * limit
+
+	opts := options.Find().SetProjection(bson.M{"_id": 0, "id_csv": 0, "continent": 0, "elevation_ft": 0}).
+		SetSkip(skip).SetLimit(limit)
+	if len(sort) == 0 {
+		sort = bson.D{{Key: "name", Value: 1}}
+	}
+	opts.SetSort(sort)
+	cur, err := depMC.DB.Collection("airports").Find(ctx, filter, opts)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer cur.Close(ctx)
+	var items []AirportDTO
+	if err := cur.All(ctx, &items); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	total, _ := depMC.DB.Collection("airports").CountDocuments(ctx, filter)
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(AirportsResponse{
+		Items: items,
+		Meta:  PageMeta{Page: page, Limit: int(limit), Total: total},
+	})
+
 }

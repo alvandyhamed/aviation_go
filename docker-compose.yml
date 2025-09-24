@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:6
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  api:
+    build: .
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      PORT: "8080"
+      MONGO_URI: "mongodb://mongo:27017"
+      MONGO_DB: "aviation"
+      INGEST_SCHEDULE: "@every 240h"           # هر 10 روز
+      AWC_BASE_URL: "https://aviationweather.gov"
+      CACHE_TTL: "60"
+      DATA_URL_AIRPORTS: "https://ourairports.com/data/airports.csv"
+      DATA_URL_COUNTRIES: "https://ourairports.com/data/countries.csv"
+      DATA_URL_REGIONS: "https://ourairports.com/data/regions.csv"
+    ports:
+      - "8085:8080"
+    command: ["/srv/api"]
+
+  # اجرای یک‌بارهٔ ingest (برای بار اول یا آپدیت دستی)
+  ingest-once:
+    build: .
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      MONGO_URI: "mongodb://mongo:27017"
+      MONGO_DB: "aviation"
+      DATA_URL_AIRPORTS: "https://ourairports.com/data/airports.csv"
+      DATA_URL_COUNTRIES: "https://ourairports.com/data/countries.csv"
+      DATA_URL_REGIONS: "https://ourairports.com/data/regions.csv"
+    command: ["/srv/ingest"]
+    restart: "no"
+
+volumes:
+  mongo_data:

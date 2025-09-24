@@ -245,3 +245,18 @@ func regionsListHandler(mc *mdb.Client) http.HandlerFunc {
 		})
 	}
 }
+
+//func findacountries(w http.ResponseWriter, r *http.Request) {
+//	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+//	defer cancel()
+//	q := strings.TrimSpace(r.URL.Query().Get("q"))
+//	page := getPage(r)
+//	limit := getLimit(r, 20, 200)
+//	skip := int64(page-1) * limit
+//
+//	filter := bson.M{}
+//	if q != "" {
+//
+//	}
+//
+//}

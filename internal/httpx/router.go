@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+// @title           SepTaf API
+// @version         1.0
+// @description     This is the API documentation for the SepTaf application.
+// @host            localhost:8086
+// @BasePath        /
 func NewRouter(mc *mdb.Client, cfg config.Config) http.Handler {
 	SetDeps(mc, cfg)
 	mux := http.NewServeMux()
@@ -26,6 +31,8 @@ func NewRouter(mc *mdb.Client, cfg config.Config) http.Handler {
 			DB:     mc.DB.Name(),
 		})
 	})
+	mux.HandleFunc("/test", Test)
+	mux.HandleFunc("/airportsList", airportsList)
 	mux.HandleFunc("/airports", airportsListHandler(mc))   // GET ?q=&country=&type=&page=&limit=
 	mux.HandleFunc("/countries", countriesListHandler(mc)) // GET ?q=&page=&limit=
 	mux.HandleFunc("/regions", regionsListHandler(mc))     // GET ?q=&country=&page=&limit=

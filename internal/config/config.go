@@ -23,7 +23,7 @@ func getenv(k, def string) string {
 
 func Load() Config {
 	return Config{
-		Port:           getenv("PORT", "8080"),
+		Port:           getenv("PORT", "8086"),
 		MongoURI:       getenv("MONGO_URI", "mongodb://localhost:27017"),
 		MongoDB:        getenv("MONGO_DB", "aviation"),
 		URLAirports:    getenv("DATA_URL_AIRPORTS", "https://ourairports.com/data/airports.csv"),
