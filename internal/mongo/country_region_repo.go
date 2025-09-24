@@ -14,6 +14,7 @@ type CountryDoc struct {
 	Code      string `bson:"code"`                // e.g. "US"
 	Name      string `bson:"name,omitempty"`      // "United States"
 	Continent string `bson:"continent,omitempty"` // "NA"
+	Keywords  string `bson:"keywords,omitempty"`
 }
 
 func (c *Client) EnsureCountriesIndexes(ctx context.Context) error {
@@ -21,6 +22,7 @@ func (c *Client) EnsureCountriesIndexes(ctx context.Context) error {
 	_, err := col.Indexes().CreateMany(ctx, []mongo.IndexModel{
 		{Keys: bson.D{{Key: "code", Value: 1}}, Options: options.Index().SetUnique(true)},
 		{Keys: bson.D{{Key: "name", Value: 1}}},
+		{Keys: bson.D{{Key: "keywords", Value: 1}}},
 	})
 	return err
 }

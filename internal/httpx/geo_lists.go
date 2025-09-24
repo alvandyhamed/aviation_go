@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -246,17 +247,86 @@ func regionsListHandler(mc *mdb.Client) http.HandlerFunc {
 	}
 }
 
-//func findacountries(w http.ResponseWriter, r *http.Request) {
-//	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
-//	defer cancel()
-//	q := strings.TrimSpace(r.URL.Query().Get("q"))
-//	page := getPage(r)
-//	limit := getLimit(r, 20, 200)
-//	skip := int64(page-1) * limit
-//
-//	filter := bson.M{}
-//	if q != "" {
-//
-//	}
-//
-//}
+// Find Countries godoc
+// @Summary      Search Countries Code
+// @Description  Search Countries Code
+// @Tags         Countries
+// @Produce      json
+// @Param        q     query  string  false  "Search term"
+// @Param        page  query  int     false  "Page number"       default(1)
+// @Param        limit query  int     false  "Items per page"    default(20)
+// @Success      200   {object}  CountriesResponse
+// @Failure      500   {object}  map[string]string "Internal Server Error"
+// @Router       /countries_find [get]
+func findacountries(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	page := getPage(r)
+	if page < 1 {
+		page = 1
+	}
+	limit := getLimit(r, 20, 200)
+	if limit <= 0 {
+		limit = 20
+	}
+	skip := int64(page-1) * limit
+
+	// فیلتر
+	filter := bson.M{}
+	if q != "" {
+		// جلوگیری از regex injection
+		pattern := regexp.QuoteMeta(q)
+		filter["keywords"] = bson.M{"$regex": pattern, "$options": "i"}
+	}
+
+	sort := bson.D{{Key: "name", Value: 1}}
+	opts := options.Find().
+		SetProjection(bson.M{
+			"_id":          0,
+			"id_csv":       0,
+			"continent":    0,
+			"elevation_ft": 0,
+		}).
+		SetSkip(skip).
+		SetLimit(limit).
+		SetSort(sort)
+
+	cur, err := depMC.DB.Collection("countries").Find(ctx, filter, opts)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer cur.Close(ctx)
+
+	var items []CountryDTO
+	if err := cur.All(ctx, &items); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	total, err := depMC.DB.Collection("countries").CountDocuments(ctx, filter)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	// گزینه ۱: struct واضح
+	resp := struct {
+		Items []CountryDTO `json:"items"`
+		Meta  PageMeta     `json:"meta"`
+	}{
+		Items: items,
+		Meta:  PageMeta{Page: page, Limit: int(limit), Total: total},
+	}
+	_ = json.NewEncoder(w).Encode(resp)
+
+	// گزینه ۲ (جایگزین): اگر map می‌خوای
+	// _ = json.NewEncoder(w).Encode(map[string]interface{}{
+	// 	"items": items,
+	// 	"meta":  PageMeta{Page: page, Limit: int(limit), Total: total},
+	// })
+}

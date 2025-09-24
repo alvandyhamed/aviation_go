@@ -56,6 +56,7 @@ func ParseCountriesStreamAndUpsert(ctx context.Context, path string, mc *mdb.Cli
 			Code:      get(row, "code"),
 			Name:      get(row, "name"),
 			Continent: get(row, "continent"),
+			Keywords:  get(row, "keywords"),
 		}
 		if doc.Code == "" {
 			continue
