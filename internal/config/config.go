@@ -12,6 +12,9 @@ type Config struct {
 	URLCountries   string
 	URLRegions     string
 	IngestSchedule string
+	URLFIRs        string
+	FIRCountry     string
+	WIKIAPI        string
 }
 
 func getenv(k, def string) string {
@@ -30,6 +33,7 @@ func Load() Config {
 		URLCountries:   getenv("DATA_URL_COUNTRIES", "https://ourairports.com/data/countries.csv"),
 		URLRegions:     getenv("DATA_URL_REGIONS", "https://ourairports.com/data/regions.csv"),
 		IngestSchedule: getenv("INGEST_SCHEDULE", "@every 240h"), // 10 روز
-
+		FIRCountry:     getenv("FIR_COUNTRY", "IR"),
+		WIKIAPI:        getenv("WIKI_API", "https://www.wikiapi.com/"),
 	}
 }

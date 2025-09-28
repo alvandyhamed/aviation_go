@@ -16,3 +16,7 @@ swag init -g cmd/api/main.go -o internal/docs
 go run ./cmd/api  
 
 go run ./cmd/ingest ==>update data
+
+
+https://docs.openaip.net/?utm_source=chatgpt.com#/
+openaip.net
