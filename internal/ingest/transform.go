@@ -72,6 +72,7 @@ func ParseAirportsStreamAndUpsert(ctx context.Context, path string, mc *mdb.Clie
 			Ident:        get("ident"),
 			GPSCode:      get("gps_code"),
 			IATACode:     get("iata_code"),
+			IcaoCode:     get("icao_code"),
 			Name:         get("name"),
 			Type:         get("type"),
 			Municipality: get("municipality"),

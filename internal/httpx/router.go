@@ -31,12 +31,9 @@ func NewRouter(mc *mdb.Client, cfg config.Config) http.Handler {
 			DB:     mc.DB.Name(),
 		})
 	})
-	mux.HandleFunc("/test", Test)
 	mux.HandleFunc("/countries_find", findacountries)
 	mux.HandleFunc("/airportsList", airportsList)
-	mux.HandleFunc("/airports", airportsListHandler(mc))   // GET ?q=&country=&type=&page=&limit=
-	mux.HandleFunc("/countries", countriesListHandler(mc)) // GET ?q=&page=&limit=
-	mux.HandleFunc("/regions", regionsListHandler(mc))     // GET ?q=&country=&page=&limit=
+	mux.HandleFunc("/regions", regionsListHandler(mc)) // GET ?q=&country=&page=&limit=
 
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 	mux.HandleFunc("/swagger/doc.json", func(w http.ResponseWriter, r *http.Request) {
