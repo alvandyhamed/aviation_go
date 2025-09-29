@@ -36,6 +36,8 @@ func NewRouter(mc *mdb.Client, cfg config.Config) http.Handler {
 	mux.HandleFunc("/regions", regionsListHandler(mc)) // GET ?q=&country=&page=&limit=
 
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
+
+	mux.HandleFunc("/firList", firList)
 	mux.HandleFunc("/swagger/doc.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		doc := docs.SwaggerInfo.ReadDoc()
