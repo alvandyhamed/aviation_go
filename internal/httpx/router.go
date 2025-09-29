@@ -38,6 +38,10 @@ func NewRouter(mc *mdb.Client, cfg config.Config) http.Handler {
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 
 	mux.HandleFunc("/firList", firList)
+
+	//Proxy
+	mux.HandleFunc("/wx/metar", http.HandlerFunc(GetMETAR))
+	mux.HandleFunc("/wx/taf", http.HandlerFunc(GetTAF))
 	mux.HandleFunc("/swagger/doc.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		doc := docs.SwaggerInfo.ReadDoc()
