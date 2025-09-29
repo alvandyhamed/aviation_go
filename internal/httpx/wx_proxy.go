@@ -66,9 +66,9 @@ func fetchAWC(ctx context.Context, resource, icao string, hours int) ([]byte, in
 // @Produce      json
 // @Param        icao   query   string  true   "ICAO code (e.g., OIII, KJFK)"
 // @Param        hours  query   int     false  "Lookback hours (default 2)"
-// @Success      200    {object}  map[string]any
-// @Failure      400    {object}  map[string]string
-// @Failure      502    {object}  map[string]string
+// @Success      200    {array}   httpx.MetarDTO
+// @Failure      400  {object}  httpx.HTTPError
+// @Failure      502    502  {object}  httpx.HTTPError
 // @Router       /wx/metar [get]
 func GetMETAR(w http.ResponseWriter, r *http.Request) {
 	icao := strings.ToUpper(strings.TrimSpace(r.URL.Query().Get("icao")))
@@ -110,9 +110,9 @@ func GetMETAR(w http.ResponseWriter, r *http.Request) {
 // @Produce      json
 // @Param        icao   query   string  true   "ICAO code (e.g., OIII, KJFK)"
 // @Param        hours  query   int     false  "Lookback hours (default 24)"
-// @Success      200    {object}  map[string]any
-// @Failure      400    {object}  map[string]string
-// @Failure      502    {object}  map[string]string
+// @Success      200    {array}   httpx.TafDTO
+// @Failure      400    {object}  httpx.HTTPError
+// @Failure      502   {object}  httpx.HTTPError
 // @Router       /wx/taf [get]
 func GetTAF(w http.ResponseWriter, r *http.Request) {
 	icao := strings.ToUpper(strings.TrimSpace(r.URL.Query().Get("icao")))
