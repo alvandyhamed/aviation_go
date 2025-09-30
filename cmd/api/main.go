@@ -11,14 +11,28 @@ import (
 	"SepTaf/internal/ingest"
 	mdb "SepTaf/internal/mongo"
 	"context"
+	"fmt"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/robfig/cron/v3"
 )
 
+func init() {
+	// اول تلاش می‌کنیم .env را لود کنیم؛ اگر نبود هم ادامه می‌دهیم
+	_ = godotenv.Load() // .env
+	// یا اگر چند فایل داری:
+	// _ = godotenv.Load(".env.local", ".env")
+}
+
 func main() {
+
+	_ = godotenv.Load()
+	fmt.Println("PORT=", os.Getenv("PORT"))
+	fmt.Println("MONGO_URI=", os.Getenv("MONGO_URI"))
 
 	cfg := config.Load()
 	ctx := context.Background()

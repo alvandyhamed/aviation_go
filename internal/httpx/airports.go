@@ -49,6 +49,8 @@ type AirportsResponse struct {
 // @Param        page     query   int     false  "page (>=1)"      default(1)
 // @Param        limit    query   int     false  "items per page"  default(20)  minimum(1)  maximum(200)
 // @Success      200      {object}  AirportsResponse
+// @Failure      400  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
 // @Router       /airportsList [get]
 func airportsList(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)

@@ -5,16 +5,18 @@ import (
 )
 
 type Config struct {
-	Port           string
-	MongoURI       string
-	MongoDB        string
-	URLAirports    string
-	URLCountries   string
-	URLRegions     string
-	IngestSchedule string
-	URLFIRs        string
-	FIRCountry     string
-	WIKIAPI        string
+	Port            string
+	MongoURI        string
+	MongoDB         string
+	URLAirports     string
+	URLCountries    string
+	URLRegions      string
+	IngestSchedule  string
+	URLFIRs         string
+	FIRCountry      string
+	WIKIAPI         string
+	FAACLIENTID     string
+	FAACLIENTSECRET string
 }
 
 func getenv(k, def string) string {
@@ -26,14 +28,16 @@ func getenv(k, def string) string {
 
 func Load() Config {
 	return Config{
-		Port:           getenv("PORT", "8086"),
-		MongoURI:       getenv("MONGO_URI", "mongodb://localhost:27017"),
-		MongoDB:        getenv("MONGO_DB", "aviation"),
-		URLAirports:    getenv("DATA_URL_AIRPORTS", "https://ourairports.com/data/airports.csv"),
-		URLCountries:   getenv("DATA_URL_COUNTRIES", "https://ourairports.com/data/countries.csv"),
-		URLRegions:     getenv("DATA_URL_REGIONS", "https://ourairports.com/data/regions.csv"),
-		IngestSchedule: getenv("INGEST_SCHEDULE", "@every 240h"), // 10 روز
-		FIRCountry:     getenv("FIR_COUNTRY", "IR"),
-		WIKIAPI:        getenv("WIKI_API", "https://www.wikiapi.com/"),
+		Port:            getenv("PORT", "8086"),
+		MongoURI:        getenv("MONGO_URI", "mongodb://localhost:27017"),
+		MongoDB:         getenv("MONGO_DB", "aviation"),
+		URLAirports:     getenv("DATA_URL_AIRPORTS", "https://ourairports.com/data/airports.csv"),
+		URLCountries:    getenv("DATA_URL_COUNTRIES", "https://ourairports.com/data/countries.csv"),
+		URLRegions:      getenv("DATA_URL_REGIONS", "https://ourairports.com/data/regions.csv"),
+		IngestSchedule:  getenv("INGEST_SCHEDULE", "@every 240h"), // 10 روز
+		FIRCountry:      getenv("FIR_COUNTRY", "IR"),
+		WIKIAPI:         getenv("WIKI_API", "https://www.wikiapi.com/"),
+		FAACLIENTID:     getenv("FAACLIENTID", ""),
+		FAACLIENTSECRET: getenv("FAACLIENTSECRET", ""),
 	}
 }

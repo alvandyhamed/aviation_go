@@ -20,3 +20,9 @@ go run ./cmd/ingest ==>update data
 
 https://docs.openaip.net/?utm_source=chatgpt.com#/
 openaip.net
+
+
+https://aviationweather.gov/data/api/#schema
+
+
+https://api.faa.gov/

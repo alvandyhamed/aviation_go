@@ -42,6 +42,8 @@ func NewRouter(mc *mdb.Client, cfg config.Config) http.Handler {
 	//Proxy
 	mux.HandleFunc("/wx/metar", http.HandlerFunc(GetMETAR))
 	mux.HandleFunc("/wx/taf", http.HandlerFunc(GetTAF))
+	rl := NewRateLimiter(29)
+	mux.Handle("/faa/notams", LimitMiddleware(rl, http.HandlerFunc(GetNOTAM)))
 	mux.HandleFunc("/swagger/doc.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		doc := docs.SwaggerInfo.ReadDoc()

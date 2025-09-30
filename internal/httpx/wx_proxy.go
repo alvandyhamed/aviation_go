@@ -68,7 +68,7 @@ func fetchAWC(ctx context.Context, resource, icao string, hours int) ([]byte, in
 // @Param        hours  query   int     false  "Lookback hours (default 2)"
 // @Success      200    {array}   httpx.MetarDTO
 // @Failure      400  {object}  httpx.HTTPError
-// @Failure      502    502  {object}  httpx.HTTPError
+// @Failure      502  {object}  httpx.HTTPError
 // @Router       /wx/metar [get]
 func GetMETAR(w http.ResponseWriter, r *http.Request) {
 	icao := strings.ToUpper(strings.TrimSpace(r.URL.Query().Get("icao")))

@@ -46,6 +46,8 @@ type RegionsResponse struct {
 // @Param       page     query   int     false  "page"  default(1)
 // @Param       limit    query   int     false  "limit" default(50) minimum(1) maximum(500)
 // @Success     200      {object}  RegionsResponse
+// @Failure      400  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
 // @Router      /regions [get]
 func regionsListHandler(mc *mdb.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +111,8 @@ func regionsListHandler(mc *mdb.Client) http.HandlerFunc {
 // @Param        page  query  int     false  "Page number"       default(1)
 // @Param        limit query  int     false  "Items per page"    default(20)
 // @Success      200   {object}  CountriesResponse
-// @Failure      500   {object}  map[string]string "Internal Server Error"
+// @Failure      400  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
 // @Router       /countries_find [get]
 func findacountries(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
