@@ -80,7 +80,7 @@ func airportsList(w http.ResponseWriter, r *http.Request) {
 		filter["iso_country"] = country
 	}
 	if icao != "" {
-		filter["icao"] = icao
+		filter["icao_code"] = icao
 	}
 	if iata != "" {
 		filter["iata_code"] = iata
