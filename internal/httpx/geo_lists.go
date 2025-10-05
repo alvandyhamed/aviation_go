@@ -45,6 +45,17 @@ type RegionsResponse struct {
 // @Param       country  query   string  false  "ISO country (e.g. US)"
 // @Param       page     query   int     false  "page"  default(1)
 // @Param       limit    query   int     false  "limit" default(50) minimum(1) maximum(500)
+/*Headers Params*/
+// @Param        X-Client-Id     header  string  true   "Client ID (e.g., client-42)"
+// @Param        X-Key-Version   header  string  true   "Key version (e.g., v1)"
+// @Param        X-Date          header  string  true   "Request time (RFC3339 or epoch seconds)"
+// @Param        X-Nonce         header  string  true   "Random nonce (UUID/base64)"
+// @Param        X-Signature     header  string  true   "Base64(HMAC-SHA256(canonical, secret_vN))"
+// @Security     ClientIDAuth
+// @Security     KeyVersionAuth
+// @Security     DateAuth
+// @Security     NonceAuth
+// @Security     SignatureAuth
 // @Success     200      {object}  RegionsResponse
 // @Failure      400  {object}  HTTPError
 // @Failure      500  {object}  HTTPError
@@ -110,6 +121,17 @@ func regionsListHandler(mc *mdb.Client) http.HandlerFunc {
 // @Param        q     query  string  false  "Search term"
 // @Param        page  query  int     false  "Page number"       default(1)
 // @Param        limit query  int     false  "Items per page"    default(20)
+/*Headers Params*/
+// @Param        X-Client-Id     header  string  true   "Client ID (e.g., client-42)"
+// @Param        X-Key-Version   header  string  true   "Key version (e.g., v1)"
+// @Param        X-Date          header  string  true   "Request time (RFC3339 or epoch seconds)"
+// @Param        X-Nonce         header  string  true   "Random nonce (UUID/base64)"
+// @Param        X-Signature     header  string  true   "Base64(HMAC-SHA256(canonical, secret_vN))"
+// @Security     ClientIDAuth
+// @Security     KeyVersionAuth
+// @Security     DateAuth
+// @Security     NonceAuth
+// @Security     SignatureAuth
 // @Success      200   {object}  CountriesResponse
 // @Failure      400  {object}  HTTPError
 // @Failure      500  {object}  HTTPError

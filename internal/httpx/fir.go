@@ -40,10 +40,21 @@ type HTTPError struct {
 // @Param        country   query   string  false  "Find FIRs for country (name or ISO code)"
 // @Param        fir_name  query   string  false  "Find by FIR name (e.g., Tehran)"
 // @Param        fir_code  query   string  false  "Find by FIR ICAO code (e.g., OIIX)"
+/*Headers Params*/
+// @Param        X-Client-Id     header  string  true   "Client ID (e.g., client-42)"
+// @Param        X-Key-Version   header  string  true   "Key version (e.g., v1)"
+// @Param        X-Date          header  string  true   "Request time (RFC3339 or epoch seconds)"
+// @Param        X-Nonce         header  string  true   "Random nonce (UUID/base64)"
+// @Param        X-Signature     header  string  true   "Base64(HMAC-SHA256(canonical, secret_vN))"
+// @Security     ClientIDAuth
+// @Security     KeyVersionAuth
+// @Security     DateAuth
+// @Security     NonceAuth
+// @Security     SignatureAuth
 // @Success      200  {object}  FirResponse
 // @Failure      400  {object}  HTTPError
 // @Failure      500  {object}  HTTPError
-// @Router       /firList  [get]
+// @Router       /fir_list  [get]
 func firList(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()

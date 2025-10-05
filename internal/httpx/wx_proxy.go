@@ -66,6 +66,17 @@ func fetchAWC(ctx context.Context, resource, icao string, hours int) ([]byte, in
 // @Produce      json
 // @Param        icao   query   string  true   "ICAO code (e.g., OIII, KJFK)"
 // @Param        hours  query   int     false  "Lookback hours (default 2)"
+/*Headers Params*/
+// @Param        X-Client-Id     header  string  true   "Client ID (e.g., client-42)"
+// @Param        X-Key-Version   header  string  true   "Key version (e.g., v1)"
+// @Param        X-Date          header  string  true   "Request time (RFC3339 or epoch seconds)"
+// @Param        X-Nonce         header  string  true   "Random nonce (UUID/base64)"
+// @Param        X-Signature     header  string  true   "Base64(HMAC-SHA256(canonical, secret_vN))"
+// @Security     ClientIDAuth
+// @Security     KeyVersionAuth
+// @Security     DateAuth
+// @Security     NonceAuth
+// @Security     SignatureAuth
 // @Success      200    {array}   httpx.MetarDTO
 // @Failure      400  {object}  httpx.HTTPError
 // @Failure      502  {object}  httpx.HTTPError
@@ -110,6 +121,17 @@ func GetMETAR(w http.ResponseWriter, r *http.Request) {
 // @Produce      json
 // @Param        icao   query   string  true   "ICAO code (e.g., OIII, KJFK)"
 // @Param        hours  query   int     false  "Lookback hours (default 24)"
+/*Headers Params*/
+// @Param        X-Client-Id     header  string  true   "Client ID (e.g., client-42)"
+// @Param        X-Key-Version   header  string  true   "Key version (e.g., v1)"
+// @Param        X-Date          header  string  true   "Request time (RFC3339 or epoch seconds)"
+// @Param        X-Nonce         header  string  true   "Random nonce (UUID/base64)"
+// @Param        X-Signature     header  string  true   "Base64(HMAC-SHA256(canonical, secret_vN))"
+// @Security     ClientIDAuth
+// @Security     KeyVersionAuth
+// @Security     DateAuth
+// @Security     NonceAuth
+// @Security     SignatureAuth
 // @Success      200    {array}   httpx.TafDTO
 // @Failure      400    {object}  httpx.HTTPError
 // @Failure      502   {object}  httpx.HTTPError

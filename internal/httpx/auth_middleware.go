@@ -64,27 +64,43 @@ func sha256Hex(b []byte) string {
 	return hex.EncodeToString(h[:])
 }
 
-// ساخت canonical query
+// // ساخت canonical query
+//
+//	func canonicalQuery(raw string) string {
+//		if raw == "" {
+//			return ""
+//		}
+//		m, _ := url.ParseQuery(raw)
+//		keys := make([]string, 0, len(m))
+//		for k := range m {
+//			keys = append(keys, k)
+//		}
+//		sort.Strings(keys)
+//		parts := make([]string, 0, len(keys))
+//		for _, k := range keys {
+//			vs := m[k]
+//			sort.Strings(vs)
+//			for _, v := range vs {
+//				parts = append(parts, url.QueryEscape(k)+"="+url.QueryEscape(v))
+//			}
+//		}
+//		return strings.Join(parts, "&")
+//	}
 func canonicalQuery(raw string) string {
 	if raw == "" {
 		return ""
 	}
-	m, _ := url.ParseQuery(raw)
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
+	v, err := url.ParseQuery(raw)
+	if err != nil {
+		return "" // یا 400 بده؛ ولی برای امضا بهتره پایدار باشه
 	}
-	sort.Strings(keys)
-	parts := make([]string, 0, len(keys))
-	for _, k := range keys {
-		vs := m[k]
-		sort.Strings(vs)
-		for _, v := range vs {
-			parts = append(parts, url.QueryEscape(k)+"="+url.QueryEscape(v))
-		}
+	for k := range v {
+		sort.Strings(v[k]) // مقادیر هر کلید هم پایدار شوند
 	}
-	return strings.Join(parts, "&")
+	return v.Encode() // کلیدها را خودش سورت می‌کند؛ space => '+'
 }
+
+func canonicalQueryRaw(raw string) string { return raw }
 
 // استخراج IP واقعی (اگر پشت LB نیستی همون RemoteAddr)
 func getRemoteIP(r *http.Request) string {
@@ -209,15 +225,54 @@ func (rr *rateRegistry) allow(clientID string, rate int) bool {
 	return b.allow()
 }
 
-// ====== HMAC verify ======
+// canonicalQueryOrderInsensitive:
+// - RawQuery را parse می‌کند
+// - کلیدها را سورت می‌کند (Encode خودش انجام می‌دهد)
+// - مقدارهای هر کلید را هم سورت می‌کند تا ترتیب پارامترها/مقادیر بی‌اثر شود
+// - خروجی با سیاست form-encoding گو (space => '+')
+func canonicalQueryOrderInsensitive(raw string) string {
+	if raw == "" {
+		return ""
+	}
+	v, err := url.ParseQuery(raw)
+	if err != nil {
+		return "" // یا می‌تونی 400 بدهی؛ ولی برای پایداری امضاء، خالی هم ok است
+	}
+	for k := range v {
+		sort.Strings(v[k]) // مقدارهای تکراری یک کلید هم پایدار می‌شوند
+	}
+	// Encode: کلیدها را به‌صورت الفبایی مرتب می‌کند، escape به سبک form (space => '+')
+	return v.Encode()
+}
+
+// buildCanonical:
+// - method دست‌نخورده (همون چیزی که کلاینت می‌فرسته؛ معمولاً "GET")
+// - path دقیق و بدون دستکاری با EscapedPath (lowercase نکن)
+// - query: سورتِ کلید و مقدار (ترتیب ورودی بی‌اثر)
+// - bodyHashHex را lowercase می‌کنیم که پایدار باشد
+// - بدون newline انتهایی (policy ثابت)
+
 func buildCanonical(r *http.Request, bodyHashHex, xDate, xNonce, keyVer string) string {
-	method := strings.ToUpper(r.Method)
-	path := strings.ToLower(r.URL.Path)
-	q := canonicalQuery(r.URL.RawQuery)
-	return method + "\n" + path + "\n" + q + "\n" + bodyHashHex + "\n" + xDate + "\n" + xNonce + "\n" + keyVer
+	method := r.Method                         // همانی که آمده (GET/POST/…)
+	path := r.URL.EscapedPath()                // دقیق و بدون lowercase
+	query := canonicalQueryRaw(r.URL.RawQuery) // همانی که کلاینت فرستاده
+	body := strings.ToLower(bodyHashHex)       // برای GET خالی: e3b0...b855
+
+	return strings.Join([]string{
+		method,
+		path,
+		query, // توجه: می‌تونه خالی باشه؛ در این صورت این خط خالی می‌مونه
+		body,
+		xDate,
+		xNonce,
+		keyVer,
+	}, "\n") // بدون newline نهایی
 }
 
 func verifyHMAC(secretRawBase64 string, canonical string, sigB64 string) error {
+
+	debugCanonical(canonical, secretRawBase64)
+
 	secret, err := base64.StdEncoding.DecodeString(secretRawBase64)
 	if err != nil {
 		return fmt.Errorf("bad secret encoding: %w", err)
@@ -226,6 +281,7 @@ func verifyHMAC(secretRawBase64 string, canonical string, sigB64 string) error {
 	m.Write([]byte(canonical))
 	want := m.Sum(nil)
 	got, err := base64.StdEncoding.DecodeString(sigB64)
+
 	if err != nil {
 		return errors.New("bad signature encoding")
 	}
@@ -234,6 +290,16 @@ func verifyHMAC(secretRawBase64 string, canonical string, sigB64 string) error {
 		return errors.New("signature mismatch")
 	}
 	return nil
+}
+
+func debugCanonical(canonical, secretRawBase64 string) {
+	fmt.Printf("[DEBUG] canonical.len=%d\n", len(canonical))
+	fmt.Printf("[DEBUG] canonical.b64=%s\n", base64.StdEncoding.EncodeToString([]byte(canonical)))
+
+	secret, _ := base64.StdEncoding.DecodeString(secretRawBase64)
+	m := hmac.New(sha256.New, secret)
+	m.Write([]byte(canonical))
+	fmt.Printf("[DEBUG] server_sig=%s\n", base64.StdEncoding.EncodeToString(m.Sum(nil)))
 }
 
 // ====== Middleware ======

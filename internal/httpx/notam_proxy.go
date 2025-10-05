@@ -207,6 +207,17 @@ func buildFAAQuery(r *http.Request) (url.Values, error) {
 // @Param        sortOrder         query  string  false  "Asc | Desc"
 // @Param        pageSize          query  int     false  "Default 50 (max 1000)"
 // @Param        pageNum           query  int     false  "Default 1"
+/*Headers Params*/
+// @Param        X-Client-Id     header  string  true   "Client ID (e.g., client-42)"
+// @Param        X-Key-Version   header  string  true   "Key version (e.g., v1)"
+// @Param        X-Date          header  string  true   "Request time (RFC3339 or epoch seconds)"
+// @Param        X-Nonce         header  string  true   "Random nonce (UUID/base64)"
+// @Param        X-Signature     header  string  true   "Base64(HMAC-SHA256(canonical, secret_vN))"
+// @Security     ClientIDAuth
+// @Security     KeyVersionAuth
+// @Security     DateAuth
+// @Security     NonceAuth
+// @Security     SignatureAuth
 // @Success      200  {object}  httpx.NotamResponse
 // @Failure      400  {object}  httpx.HTTPError
 // @Failure      401  {object}  httpx.HTTPError

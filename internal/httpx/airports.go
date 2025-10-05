@@ -53,7 +53,7 @@ type AirportsResponse struct {
 // @Param        X-Key-Version   header  string  true   "Key version (e.g., v1)"
 // @Param        X-Date          header  string  true   "Request time (RFC3339 or epoch seconds)"
 // @Param        X-Nonce         header  string  true   "Random nonce (UUID/base64)"
-// @Param        X-Signature     header  string  true   "Base64(HMAC-SHA256(canonical, secret_vN))"
+// @Param        X-Signature     header  string  false   "Base64(HMAC-SHA256(canonical, secret_vN))"
 // @Security     ClientIDAuth
 // @Security     KeyVersionAuth
 // @Security     DateAuth
@@ -62,7 +62,7 @@ type AirportsResponse struct {
 // @Success      200      {object}  AirportsResponse
 // @Failure      400  {object}  HTTPError
 // @Failure      500  {object}  HTTPError
-// @Router       /airportsList [get]
+// @Router       /airports_list [get]
 func airportsList(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()

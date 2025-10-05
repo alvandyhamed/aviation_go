@@ -66,23 +66,27 @@ func NewRouter(mc *mdb.Client, cfg config.Config) http.Handler {
 			DB:     mc.DB.Name(),
 		})
 	})
-	public.HandleFunc("/countries_find", findacountries)
+
 	public.Handle("/swagger/", httpSwagger.WrapHandler)
 	public.HandleFunc("/swagger/doc.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		doc := docs.SwaggerInfo.ReadDoc()
 		_, _ = w.Write([]byte(doc))
 	})
+
+	//public.HandleFunc("/countries_find", findacountries)
+	//public.HandleFunc("/airportsList", airportsList)
+	//public.HandleFunc("/faa/", GetNOTAM)
+
 	protected := http.NewServeMux()
-
-	protected.HandleFunc("/airportsList", airportsList)
+	protected.HandleFunc("/airports_list", airportsList)
 	protected.HandleFunc("/regions", regionsListHandler(mc)) // GET ?q=&country=&page=&limit=
-
-	protected.HandleFunc("/firList", firList)
+	protected.HandleFunc("/fir_list", firList)
 
 	//Proxy
 	protected.HandleFunc("/wx/metar", http.HandlerFunc(GetMETAR))
 	protected.HandleFunc("/wx/taf", http.HandlerFunc(GetTAF))
+	protected.HandleFunc("/countries_find", http.HandlerFunc(findacountries))
 	//rl := NewRateLimiter(29)
 	//protected.Handle("/faa/notams", LimitMiddleware(rl, http.HandlerFunc(GetNOTAM)))
 	protected.HandleFunc("/faa/notams", http.HandlerFunc(GetNOTAM))
@@ -91,9 +95,9 @@ func NewRouter(mc *mdb.Client, cfg config.Config) http.Handler {
 	root := http.NewServeMux()
 	root.Handle("/", public) // آزاد
 	root.Handle("/countries_find", auth.Handler(protected))
-	root.Handle("/airportsList", auth.Handler(protected))
+	root.Handle("/airports_list", auth.Handler(protected))
 	root.Handle("/regions", auth.Handler(protected))
-	root.Handle("/firList", auth.Handler(protected))
+	root.Handle("/fir_list", auth.Handler(protected))
 	root.Handle("/wx/", auth.Handler(protected))
 	root.Handle("/faa/", auth.Handler(protected))
 
