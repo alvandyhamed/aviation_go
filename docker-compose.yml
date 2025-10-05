@@ -15,13 +15,15 @@ services:
       retries: 12
 
   api:
+    env_file:
+      - .env
     build: .
     depends_on:
       mongo:
         condition: service_healthy
     environment:
       PORT: "8080"
-      MONGO_URI: "mongodb://mongo:27017"
+      MONGO_URI: "${MONGO_URI}"
       MONGO_DB: "aviation"
       INGEST_SCHEDULE: "@every 240h"           # هر 10 روز
       AWC_BASE_URL: "https://aviationweather.gov"
@@ -35,12 +37,14 @@ services:
 
   # اجرای یک‌بارهٔ ingest (برای بار اول یا آپدیت دستی)
   ingest-once:
+    env_file:
+      - .env
     build: .
     depends_on:
       mongo:
         condition: service_healthy
     environment:
-      MONGO_URI: "mongodb://mongo:27017"
+      MONGO_URI: "${MONGO_URI}"
       MONGO_DB: "aviation"
       DATA_URL_AIRPORTS: "https://ourairports.com/data/airports.csv"
       DATA_URL_COUNTRIES: "https://ourairports.com/data/countries.csv"
